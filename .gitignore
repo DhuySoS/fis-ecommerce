@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# docs / internal specs
+YEU_CAU_FE_INTERN.pdf
+*.pdf
