@@ -13,6 +13,17 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
+  {
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "JSXAttribute[name.name='style']",
+          message: "Không dùng inline style. Viết CSS trong file .module.scss.",
+        },
+      ],
+    },
+  },
 ]);
 
 export default eslintConfig;
