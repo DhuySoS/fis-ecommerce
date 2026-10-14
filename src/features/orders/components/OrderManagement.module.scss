@@ -1,0 +1,24 @@
+.customerSelect {
+  min-width: 220px;
+}
+
+.customerPrefix {
+  font-size: 14px;
+  color: #333333;
+  margin-right: 4px;
+  user-select: none;
+  font-weight: 600;
+}
+
+.orderTabs {
+  margin-bottom: 8px;
+
+  :global(.ant-tabs-nav) {
+    margin-bottom: 16px;
+  }
+
+  :global(.ant-tabs-tab) {
+    font-size: 14px;
+    padding: 10px 16px;
+  }
+}

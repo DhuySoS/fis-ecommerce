@@ -1,23 +1,27 @@
-import { OrderStatus } from "@/lib/order-state-machine";
-
-export interface DashboardRevenue {
-  date: string;
-  totalRevenue: number;
-}
-
-export interface DashboardOrderStatusCount {
-  status: OrderStatus;
-  count: number;
-}
-
-export interface DashboardTopProduct {
+export interface TopProductDto {
   productId: number;
-  productName: string;
-  soldQuantity: number;
+  name: string;
+  quantitySold: number;
 }
 
-export interface DashboardLowStockProduct {
+export interface LowStockProductDto {
   productId: number;
-  productName: string;
+  name: string;
   stock: number;
+}
+
+export interface DashboardResponse {
+  date: string;
+  revenueToday: number | null;
+  orderCountByStatus: Record<string, number> | null;
+  top5Products: TopProductDto[] | null;
+  lowStockProducts: LowStockProductDto[] | null;
+  partial: boolean;
+  failedParts: string[];
+  elapsedMs: number;
+}
+
+export interface DashboardQueryParams {
+  date?: string;
+  mode?: "parallel" | "sequential";
 }

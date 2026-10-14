@@ -1,0 +1,114 @@
+.tableContainer {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.customTable {
+  width: 100%;
+
+  // Đảm bảo thead luôn có vị trí chuẩn
+  :global(.ant-table-thead) {
+    position: relative;
+    z-index: 2;
+  }
+
+  // 1. Reset opacity của container cha về 1 để không làm mờ thead
+  :global(.ant-spin.ant-spin-spinning .ant-spin-container) {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    user-select: auto !important;
+
+    // Vô hiệu hóa lớp phủ mờ ::after mặc định che phủ cả thead
+    &::after {
+      display: none !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+    }
+  }
+
+  // 2. Cố định thanh Header bảng (thead) luôn sáng rõ nét 100%
+  :global(.ant-spin.ant-spin-spinning .ant-table-thead) {
+    position: relative !important;
+    z-index: 2 !important;
+    opacity: 1 !important;
+    filter: none !important;
+    pointer-events: auto !important;
+  }
+
+  :global(.ant-spin.ant-spin-spinning .ant-table-thead .ant-table-cell) {
+    opacity: 1 !important;
+    filter: none !important;
+  }
+
+  // 3. Chỉ áp dụng hiệu ứng làm mờ và chặn tương tác đối với phần dữ liệu dòng (tbody)
+  :global(.ant-spin.ant-spin-spinning .ant-table-tbody) {
+    opacity: 0.35 !important;
+    filter: blur(0.5px);
+    pointer-events: none !important;
+    user-select: none !important;
+    transition: opacity 0.25s ease, filter 0.25s ease;
+  }
+
+  // 4. Spinner hiển thị nổi bật trên vùng dữ liệu
+  :global(.ant-spin.ant-spin-spinning .ant-spin-section) {
+    z-index: 10 !important;
+  }
+}
+
+.footerBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16px;
+  padding: 0 4px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.footerLeft {
+  font-size: 14px;
+  color: #595959;
+  line-height: 1.5;
+}
+
+.footerRight {
+  display: flex;
+  align-items: center;
+}
+
+.actionGroup {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.actionLink {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font-size: 14px;
+  color: #1677ff;
+  cursor: pointer;
+  transition: color 0.2s;
+
+  &:hover {
+    color: #4096ff;
+    text-decoration: underline;
+  }
+}
+
+.actionDelete {
+  color: #ff4d4f;
+
+  &:hover {
+    color: #ff7875;
+  }
+}
+
+.actionDot {
+  color: #8c8c8c;
+  user-select: none;
+}

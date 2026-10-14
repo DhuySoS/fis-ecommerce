@@ -1,9 +1,11 @@
 import React from "react";
+import type { Metadata } from "next";
+import CustomerManagement from "@/features/customers/components/CustomerManagement";
+
+export const metadata: Metadata = {
+  title: "Quản lý khách hàng | Admin",
+};
 
 export default function AdminCustomersPage() {
-  return (
-    <div>
-      <h1>Quản lý khách hàng</h1>
-    </div>
-  );
+  return <CustomerManagement />;
 }

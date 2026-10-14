@@ -6,25 +6,45 @@ import {
   OrderStatus,
   ORDER_STATUS_MAP,
 } from "@/lib/order-state-machine";
+import styles from "./StatusTag.module.scss";
 
-interface StatusTagProps {
-  status: OrderStatus | string;
+export type SupportedStatus = OrderStatus | "ACTIVE" | "INACTIVE" | string;
+
+export interface StatusTagProps {
+  status: SupportedStatus;
   showDescription?: boolean;
+  className?: string;
 }
 
-export function StatusTag({ status, showDescription = false }: StatusTagProps) {
-  const config = ORDER_STATUS_MAP[status as OrderStatus];
+const STATUS_CLASS_MAP: Record<string, string> = {
+  ACTIVE: styles.active,
+  INACTIVE: styles.inactive,
+  PENDING: styles.pending,
+  AWAITING_PAYMENT: styles.awaiting_payment,
+  PAID: styles.paid,
+  CONFIRMED: styles.confirmed,
+  COMPLETED: styles.completed,
+  CANCELLED: styles.cancelled,
+};
 
-  if (!config) {
-    return <Tag>{status}</Tag>;
-  }
+export function StatusTag({
+  status,
+  showDescription = false,
+  className,
+}: StatusTagProps) {
+  const statusKey = String(status).toUpperCase();
+  const statusClass = STATUS_CLASS_MAP[statusKey] || styles.inactive;
+
+  const orderConfig = ORDER_STATUS_MAP[statusKey as OrderStatus];
+  const label = orderConfig?.label || status;
+  const description = orderConfig?.description;
 
   return (
     <Tag
-      color={config.color}
-      title={showDescription ? config.description : undefined}
+      className={`${styles.statusTag} ${statusClass} ${className || ""}`.trim()}
+      title={showDescription ? description : undefined}
     >
-      {config.label}
+      {label}
     </Tag>
   );
 }

@@ -1,4 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { ordersApi } from "./api";
 import {
   ChangeOrderStatusInput,
@@ -19,6 +24,7 @@ export function useOrders(params?: OrderQueryParams) {
   return useQuery({
     queryKey: ORDER_KEYS.list(params),
     queryFn: () => ordersApi.getOrders(params),
+    placeholderData: keepPreviousData,
   });
 }
 

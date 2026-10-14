@@ -1,0 +1,26 @@
+.lowStockList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 8px 0;
+}
+
+.lowStockItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  color: #262626;
+}
+
+.lowStockCount {
+  font-weight: 600;
+  color: #cf1322;
+}
+
+.emptyText {
+  font-size: 13px;
+  color: #8c8c8c;
+  padding: 12px 0;
+  text-align: center;
+}

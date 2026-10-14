@@ -1,0 +1,21 @@
+.statusGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  column-gap: 32px;
+  margin: 12px 0;
+}
+
+.statusCol {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.statusItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  color: #262626;
+  font-weight: 500;
+}

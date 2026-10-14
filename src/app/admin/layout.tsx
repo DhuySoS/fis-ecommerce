@@ -1,4 +1,6 @@
 import React from "react";
+import AdminSidebar from "@/components/layout/AdminSidebar";
+import styles from "./admin-layout.module.scss";
 
 export default function AdminLayout({
   children,
@@ -6,10 +8,11 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div>
-      <aside>Admin Sidebar</aside>
-      <header>Admin Header</header>
-      <main>{children}</main>
+    <div className={styles.adminLayout}>
+      <AdminSidebar />
+      <div className={styles.adminContent}>
+        <main>{children}</main>
+      </div>
     </div>
   );
 }

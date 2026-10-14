@@ -1,0 +1,38 @@
+.actionBtn {
+  &:global(.ant-btn) {
+    background-color: #ebf5fe;
+    border: 2px solid #0160f0;
+    color: #000000;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    height: 36px;
+    padding: 0 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: none;
+    transition: all 0.2s ease;
+
+    &:not(:disabled):hover {
+      background-color: #dbeafe !important;
+      border-color: #1d4ed8 !important;
+      border: 2px solid #0160f0 !important;
+      color: #000000 !important;
+
+      > span {
+        color: #000000 !important;
+      }
+    }
+
+    &:not(:disabled):active {
+      background-color: #bfdbfe !important;
+      border-color: #1e40af !important;
+      color: #000000 !important;
+
+      > span {
+        color: #000000 !important;
+      }
+    }
+  }
+}

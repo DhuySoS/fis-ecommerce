@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
-import type { TablePaginationConfig } from "antd/es/table";
+import type { TableProps } from "antd";
 import type { SorterResult } from "antd/es/table/interface";
 
 export interface TableQueryParams {
@@ -14,7 +14,9 @@ export interface TableQueryParams {
   [key: string]: unknown;
 }
 
-export function useTableQuery(defaultPageSize = 20) {
+export function useTableQuery<RecordType = Record<string, unknown>>(
+  defaultPageSize = 20
+) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -53,7 +55,19 @@ export function useTableQuery(defaultPageSize = 20) {
     (newParams: Partial<TableQueryParams>) => {
       const current = new URLSearchParams(searchParams.toString());
 
-      Object.entries(newParams).forEach(([key, value]) => {
+      // Tự động reset page về 1 nếu thay đổi bộ lọc hoặc tìm kiếm mà không truyền page
+      const hasFilterOrSearchChange = Object.keys(newParams).some(
+        (key) => key !== "page"
+      );
+
+      const paramsToApply: Partial<TableQueryParams> = {
+        ...(newParams.page === undefined && hasFilterOrSearchChange
+          ? { page: 1 }
+          : {}),
+        ...newParams,
+      };
+
+      Object.entries(paramsToApply).forEach(([key, value]) => {
         if (value === undefined || value === null || value === "") {
           current.delete(key);
         } else {
@@ -66,26 +80,26 @@ export function useTableQuery(defaultPageSize = 20) {
     [pathname, router, searchParams]
   );
 
-  const handleTableChange = useCallback(
-    (
-      pagination: TablePaginationConfig,
-      _filters: Record<string, unknown>,
-      sorter: SorterResult<unknown> | SorterResult<unknown>[]
-    ) => {
-      const newParams: Partial<TableQueryParams> = {
-        page: pagination.current || 1,
-        pageSize: pagination.pageSize || defaultPageSize,
-      };
+  const handleTableChange: NonNullable<TableProps<RecordType>["onChange"]> =
+    useCallback(
+      (pagination, _filters, sorter) => {
+        const newParams: Partial<TableQueryParams> = {
+          page: pagination.current || 1,
+          pageSize: pagination.pageSize || defaultPageSize,
+        };
 
-      if (!Array.isArray(sorter) && sorter.field) {
-        newParams.sortBy = String(sorter.field);
-        newParams.sortOrder = sorter.order || undefined;
-      }
+        const singleSorter = Array.isArray(sorter) ? sorter[0] : sorter;
+        if (singleSorter && (singleSorter as SorterResult<RecordType>).field) {
+          newParams.sortBy = String(
+            (singleSorter as SorterResult<RecordType>).field
+          );
+          newParams.sortOrder = singleSorter.order || undefined;
+        }
 
-      updateQuery(newParams);
-    },
-    [defaultPageSize, updateQuery]
-  );
+        updateQuery(newParams);
+      },
+      [defaultPageSize, updateQuery]
+    );
 
   return {
     query,

@@ -1,0 +1,25 @@
+.filterBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 240px;
+}
+
+.filterSelect {
+  min-width: 180px;
+  flex-shrink: 0;
+}
+
+.prefixLabel {
+  font-weight: 600;
+  color: #333333;
+  margin-right: 4px;
+  user-select: none;
+}

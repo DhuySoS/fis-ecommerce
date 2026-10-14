@@ -1,0 +1,69 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.formRow {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.formCol {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.colFlex2 {
+  flex: 2;
+}
+
+.colFlex1 {
+  flex: 1;
+}
+
+.footerRow {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.cancelBtn {
+  min-width: 68px;
+}
+
+.submitBtn {
+  min-width: 68px;
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333333;
+  line-height: 22px;
+  height: 22px;
+}
+
+.required {
+  color: #ff4d4f;
+  margin-left: 2px;
+}
+
+.errorText {
+  font-size: 12px;
+  color: #ff4d4f;
+  margin-top: 2px;
+  min-height: 18px;
+  line-height: 1.4;
+}
+
+.fullWidth {
+  width: 100% !important;
+}
