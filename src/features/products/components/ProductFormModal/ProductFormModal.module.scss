@@ -50,27 +50,6 @@
   height: 36px;
 }
 
-.cancelBtn {
-  min-width: 68px;
-}
-
-.submitBtn {
-  min-width: 68px;
-  &:global(.ant-btn) {
-    border: 1.5px solid #1677ff;
-    background-color: #e6f4ff;
-    color: #000;
-    font-weight: 500;
-    &:not(:disabled):hover {
-      background-color: #1677ff;
-      border-color: #2d16ff;
-    }
-    &:not(:disabled):active {
-      background-color: #0958d9;
-    }
-  }
-}
-
 .label {
   font-size: 14px;
   font-weight: 500;
@@ -94,4 +73,11 @@
 
 .fullWidth {
   width: 100% !important;
+}
+
+.warningText {
+  font-size: 12px;
+  color: #fa8c16;
+  margin-top: 2px;
+  line-height: 1.4;
 }

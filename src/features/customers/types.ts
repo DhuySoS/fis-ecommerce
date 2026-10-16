@@ -6,6 +6,8 @@ export interface Customer {
   email: string;
   phone?: string;
   status: CustomerStatus;
+  username?: string;
+  userStatus?: string;
 }
 
 export interface CustomerQueryParams {
@@ -29,3 +31,11 @@ export interface CustomerListResponse {
   page: number;
   pageSize: number;
 }
+
+export interface CustomerActionResponse<T = Customer> {
+  success?: boolean;
+  message?: string;
+  data?: T;
+  code?: string;
+}
+

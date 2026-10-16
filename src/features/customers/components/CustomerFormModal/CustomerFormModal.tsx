@@ -3,7 +3,8 @@
 import React, { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button, Input, Select } from "antd";
+import { Input, Select } from "antd";
+import ActionButton from "@/components/shared/ActionButton";
 import FormModal from "@/components/shared/FormModal";
 import type { Customer, CustomerStatus } from "../../types";
 import { customerSchema, type CustomerFormValues } from "../../schemas";
@@ -32,6 +33,8 @@ export function CustomerFormModal({
     control,
     handleSubmit,
     reset,
+    setError,
+    clearErrors,
     formState: { errors },
   } = useForm<CustomerFormValues>({
     resolver: zodResolver(customerSchema),
@@ -64,7 +67,16 @@ export function CustomerFormModal({
   }, [open, customer, reset]);
 
   const handleFormSubmit = handleSubmit(async (data) => {
-    await onSubmit(data);
+    try {
+      await onSubmit(data);
+    } catch (err: unknown) {
+      if ((err as { code?: string })?.code === "DUPLICATE_RESOURCE") {
+        setError("email", {
+          type: "server",
+          message: "Email đã được sử dụng",
+        });
+      }
+    }
   });
 
   return (
@@ -108,6 +120,12 @@ export function CustomerFormModal({
                   type="email"
                   placeholder="Nhập email"
                   status={errors.email ? "error" : undefined}
+                  onChange={(e) => {
+                    if (errors.email) {
+                      clearErrors("email");
+                    }
+                    field.onChange(e);
+                  }}
                 />
               )}
             />
@@ -158,17 +176,15 @@ export function CustomerFormModal({
         </div>
 
         <div className={styles.footerRow}>
-          <Button onClick={onClose} className={styles.cancelBtn}>
+          <ActionButton variant="cancel" onClick={onClose}>
             Huỷ
-          </Button>
-          <Button
-            type="primary"
+          </ActionButton>
+          <ActionButton
             htmlType="submit"
             loading={loading}
-            className={styles.submitBtn}
           >
             Lưu
-          </Button>
+          </ActionButton>
         </div>
       </form>
     </FormModal>

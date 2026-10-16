@@ -48,7 +48,7 @@ export default function LoginForm({
     loginMutation.mutate(values, {
       onSuccess: (data) => {
         message.success(
-          (data as { message?: string })?.message || "Đăng nhập thành công!"
+          (data as { message?: string })?.message || "Đăng nhập thành công!",
         );
 
         // Lưu session vào store & cookies
@@ -56,7 +56,7 @@ export default function LoginForm({
 
         // Điều hướng dựa vào vai trò người dùng
         if (data.role === "ADMIN" || data.role === "PRODUCT_OWNER") {
-          router.push("/admin/orders");
+          router.push("/admin/dashboard");
         } else {
           router.push("/orders/new");
         }

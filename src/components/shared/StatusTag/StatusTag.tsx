@@ -20,6 +20,7 @@ const STATUS_CLASS_MAP: Record<string, string> = {
   ACTIVE: styles.active,
   INACTIVE: styles.inactive,
   PENDING: styles.pending,
+  PENDING_ACTIVATION: styles.pending,
   AWAITING_PAYMENT: styles.awaiting_payment,
   PAID: styles.paid,
   CONFIRMED: styles.confirmed,

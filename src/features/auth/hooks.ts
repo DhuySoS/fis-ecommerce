@@ -1,6 +1,6 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { authApi } from "./api";
-import type { LoginRequest, RegisterRequest } from "./types";
+import type { LoginRequest, RegisterRequest, SetPasswordRequest } from "./types";
 
 export function useLogin() {
   return useMutation({
@@ -19,3 +19,28 @@ export function useLogout() {
     mutationFn: () => authApi.logout(),
   });
 }
+
+export function useMe(options?: { enabled?: boolean }) {
+  return useQuery({
+    queryKey: ["users", "me"],
+    queryFn: () => authApi.getMe(),
+    enabled: options?.enabled,
+  });
+}
+
+export function useVerifyActivationToken(token: string | null) {
+  return useQuery({
+    queryKey: ["auth", "activation", "verify", token],
+    queryFn: () => authApi.verifyActivationToken(token!),
+    enabled: Boolean(token),
+    retry: false,
+  });
+}
+
+export function useSetPasswordAndActivate() {
+  return useMutation({
+    mutationFn: (data: SetPasswordRequest) =>
+      authApi.setPasswordAndActivate(data),
+  });
+}
+

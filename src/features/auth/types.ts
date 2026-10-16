@@ -28,3 +28,28 @@ export interface UserResponse {
   role: string;
   status: string;
 }
+
+export interface UserProfileResponse {
+  id: number;
+  username: string;
+  name: string;
+  email: string;
+  phone?: string;
+  role: string;
+  status?: string;
+  customerId?: number;
+}
+
+export interface ActivationVerifyResponse {
+  valid: boolean;
+  message: string;
+  username?: string;
+  email?: string;
+  name?: string;
+}
+
+export interface SetPasswordRequest {
+  token: string;
+  newPassword: string;
+}
+

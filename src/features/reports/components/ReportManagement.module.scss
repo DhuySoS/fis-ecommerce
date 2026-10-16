@@ -1,0 +1,60 @@
+.pageWrapper {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.reportCard {
+  width: 100%;
+  max-width: 640px;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 24px 28px;
+}
+
+.formBody {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.dateRangeRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.formatField {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.radioGroup {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.buttonRow {
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+}
+
+.exportBtn {
+  min-width: 140px;
+  height: 38px;
+  font-weight: 600;
+}

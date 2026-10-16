@@ -38,7 +38,7 @@ export interface CreateOrderItemInput {
 }
 
 export interface CreateOrderInput {
-  customerId: number;
+  customerId?: number;
   items: CreateOrderItemInput[];
 }
 

@@ -1,48 +1,62 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const AUTH_ROUTES = ["/login", "/register", "/auth"];
+const AUTH_ROUTES = ["/login", "/register", "/auth", "/set-password"];
+
+// Danh sách các route trong khu vực Admin mà Product Owner (PO) được phép truy cập
+const PRODUCT_OWNER_ALLOWED_ROUTES = [
+  "/admin/dashboard",
+  "/admin/products",
+  "/admin/categories",
+];
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  // Kiểm tra refreshToken và role trong Cookie để xác thực phiên đăng nhập
+  // Lấy refreshToken và role từ Cookie để xác thực phiên đăng nhập
   const token = request.cookies.get("refreshToken")?.value;
   const role = request.cookies.get("role")?.value;
 
   const isAuthRoute = AUTH_ROUTES.some(
-    (route) => pathname === route || pathname.startsWith(`${route}/`)
+    (route) => pathname === route || pathname.startsWith(`${route}/`),
   );
 
-  // 1. Đã đăng nhập (có token) mà truy cập vào các trang đăng nhập / đăng ký
-  if (isAuthRoute && token) {
-    const from = request.nextUrl.searchParams.get("from");
-    if (
-      from &&
-      from.startsWith("/") &&
-      !AUTH_ROUTES.some((r) => from.startsWith(r))
-    ) {
-      return NextResponse.redirect(new URL(from, request.url));
-    }
+  const isAdminRole = role === "ADMIN" || role === "PRODUCT_OWNER";
 
-    const destination =
-      role === "ADMIN" || role === "PRODUCT_OWNER"
-        ? "/admin/orders"
-        : "/orders/new";
+  // 1. Khi chưa có token: Mặc định đá ra /login (ngoại trừ các trang login/register/auth/set-password)
+  if (!token) {
+    if (isAuthRoute) {
+      return NextResponse.next();
+    }
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  // 2. Khi đã đăng nhập:
+  // Nếu truy cập vào các trang auth (/login, /register, /auth) hoặc trang chủ "/"
+  // Không tự động redirect nếu đang truy cập /set-password
+  const isAuthRedirectRoute = ["/login", "/register", "/auth"].some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`),
+  );
+
+  if (isAuthRedirectRoute || pathname === "/") {
+    const destination = isAdminRole ? "/admin/dashboard" : "/orders/new";
     return NextResponse.redirect(new URL(destination, request.url));
   }
 
-  // 2. Bảo vệ khu vực Admin
-  if (pathname.startsWith("/admin")) {
-    // Chưa đăng nhập mà truy cập /admin/* thì chuyển về /login
-    if (!token) {
-      const loginUrl = new URL("/login", request.url);
-      loginUrl.searchParams.set("from", pathname);
-      return NextResponse.redirect(loginUrl);
-    }
+  // Nếu là Customer mà truy cập vào khu vực Admin (/admin/*) thì đẩy sang shop
+  if (pathname.startsWith("/admin") && !isAdminRole) {
+    return NextResponse.redirect(new URL("/orders/new", request.url));
+  }
 
-    // Đã đăng nhập nhưng không có quyền Admin/Product Owner thì chuyển về trang khách hàng
-    if (role && role !== "ADMIN" && role !== "PRODUCT_OWNER") {
-      return NextResponse.redirect(new URL("/orders/new", request.url));
+  // Product Owner chỉ được truy cập các route được cho phép trong khu vực Admin
+  if (role === "PRODUCT_OWNER") {
+    if (pathname === "/orders/new") {
+      return NextResponse.redirect(new URL("/admin/dashboard", request.url));
+    }
+    const isAllowedForPO = PRODUCT_OWNER_ALLOWED_ROUTES.some(
+      (route) => pathname === route || pathname.startsWith(`${route}/`),
+    );
+    if (pathname.startsWith("/admin") && !isAllowedForPO) {
+      return NextResponse.redirect(new URL("/admin/dashboard", request.url));
     }
   }
 
@@ -51,12 +65,6 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/admin/:path*",
-    "/login",
-    "/login/:path*",
-    "/register",
-    "/register/:path*",
-    "/auth",
-    "/auth/:path*",
+    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

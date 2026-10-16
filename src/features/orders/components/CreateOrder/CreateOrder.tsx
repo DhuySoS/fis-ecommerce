@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
-import { App, Select } from "antd";
+import { Alert, App, Input, Select, Skeleton } from "antd";
 import { CaretDownOutlined } from "@ant-design/icons";
 import AdminPageContainer from "@/components/shared/AdminPageContainer";
 import ActionButton from "@/components/shared/ActionButton";
+import { useAuthStore, useMe } from "@/features/auth";
 import { useCustomers } from "@/features/customers/hooks";
 import { useProducts } from "@/features/products/hooks";
 import { useCreateOrder } from "@/features/orders/hooks";
@@ -16,19 +17,43 @@ import OrderProductPicker from "./OrderProductPicker";
 import type { SelectedOrderItem, ProductOptionItem } from "./types";
 import styles from "./CreateOrder.module.scss";
 
+const emptySubscribe = () => () => {};
+
 export default function CreateOrder() {
   const router = useRouter();
   const { message } = App.useApp();
 
-  const { data: customerData, isLoading: isLoadingCustomers } = useCustomers();
+  const isClient = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false,
+  );
+
+  const user = useAuthStore((state) => state.user);
+  const role = user?.role;
+  const isAdmin = role === "ADMIN";
+  const isCustomer = role === "CUSTOMER";
+  const isProductOwner = role === "PRODUCT_OWNER";
+
+  // Admin mới cần tải danh sách toàn bộ khách hàng
+  const { data: customerData, isLoading: isLoadingCustomers } = useCustomers(
+    undefined,
+    { enabled: isClient && isAdmin },
+  );
+
+  // Customer tự động lấy thông tin của chính mình
+  const { data: userProfile, isLoading: isLoadingProfile } = useMe({
+    enabled: isClient && isCustomer,
+  });
+
   const { data: productData, isLoading: isLoadingProducts } = useProducts({
     pageSize: 100,
   });
 
   const createOrderMutation = useCreateOrder();
 
-  // Form State
-  const [selectedCustomerId, setSelectedCustomerId] = useState<
+  // Form State: Dành cho Admin chọn khách hàng
+  const [adminSelectedCustomerId, setAdminSelectedCustomerId] = useState<
     number | undefined
   >(undefined);
   const [selectedProductId, setSelectedProductId] = useState<
@@ -37,7 +62,12 @@ export default function CreateOrder() {
   const [quantity, setQuantity] = useState<number>(1);
   const [orderItems, setOrderItems] = useState<SelectedOrderItem[]>([]);
 
-  // Danh sách khách hàng dạng [Tên] · [Email]
+  // Customer ID: Tự động lấy từ profile khi là Customer, hoặc lấy từ ô chọn khi là Admin
+  const effectiveCustomerId = isCustomer
+    ? userProfile?.customerId || user?.customerId
+    : adminSelectedCustomerId;
+
+  // Danh sách khách hàng dạng [Tên] · [Email] (dành cho Admin)
   const customerOptions = useMemo(() => {
     if (!customerData?.items) return [];
     return customerData.items.map((c) => ({
@@ -148,7 +178,7 @@ export default function CreateOrder() {
 
   // Xử lý submit tạo đơn hàng
   const handleCreateOrder = () => {
-    if (!selectedCustomerId) {
+    if (isAdmin && !adminSelectedCustomerId) {
       message.error("Vui lòng chọn khách hàng!");
       return;
     }
@@ -160,7 +190,7 @@ export default function CreateOrder() {
 
     createOrderMutation.mutate(
       {
-        customerId: selectedCustomerId,
+        customerId: effectiveCustomerId,
         items: orderItems.map((item) => ({
           productId: item.productId,
           quantity: item.quantity,
@@ -174,9 +204,17 @@ export default function CreateOrder() {
           message.success(resObj?.message || "Tạo đơn hàng thành công!");
           const orderId = resObj?.data?.id || resObj?.id;
           if (orderId) {
-            router.push(`/admin/orders/${orderId}`);
+            if (isCustomer) {
+              router.push(`/orders/${orderId}`);
+            } else {
+              router.push(`/admin/orders/${orderId}`);
+            }
           } else {
-            router.push("/admin/orders");
+            if (isCustomer) {
+              router.push("/orders/new");
+            } else {
+              router.push("/admin/orders");
+            }
           }
         },
         onError: (err: unknown) => {
@@ -205,15 +243,29 @@ export default function CreateOrder() {
                     <label className={styles.label}>
                       Khách hàng <span className={styles.required}>*</span>
                     </label>
-                    <Select
-                      className={styles.customerSelect}
-                      placeholder="Chọn khách hàng"
-                      suffixIcon={<CaretDownOutlined />}
-                      value={selectedCustomerId}
-                      onChange={(val) => setSelectedCustomerId(val)}
-                      options={customerOptions}
-                      loading={isLoadingCustomers}
-                    />
+                    {isCustomer ? (
+                      <Input
+                        className={styles.customerInput}
+                        value={
+                          userProfile?.name
+                            ? `${userProfile.name} · ${userProfile.email || user?.username}`
+                            : isLoadingProfile
+                              ? "Đang tải thông tin khách hàng..."
+                              : user?.username || "Khách hàng hiện tại"
+                        }
+                        disabled
+                      />
+                    ) : (
+                      <Select
+                        className={styles.customerSelect}
+                        placeholder="Chọn khách hàng"
+                        suffixIcon={<CaretDownOutlined />}
+                        value={adminSelectedCustomerId}
+                        onChange={(val) => setAdminSelectedCustomerId(val)}
+                        options={customerOptions}
+                        loading={isLoadingCustomers}
+                      />
+                    )}
                   </div>
 
                   {/* Component chọn sản phẩm, số lượng và nút Thêm dòng */}
@@ -249,7 +301,10 @@ export default function CreateOrder() {
                 className={styles.submitBtn}
                 onClick={handleCreateOrder}
                 loading={createOrderMutation.isPending}
-                disabled={!selectedCustomerId || orderItems.length === 0}
+                disabled={
+                  (isAdmin && !adminSelectedCustomerId) ||
+                  orderItems.length === 0
+                }
               >
                 Tạo đơn
               </ActionButton>

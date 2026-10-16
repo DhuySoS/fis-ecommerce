@@ -1,20 +1,38 @@
-export type ReportParamType = "date" | "integer" | "decimal" | "string" | "select";
-
-export interface ReportParamOption {
-  label: string;
-  value: string | number;
+export interface ReportParamResponse {
+  name: string;
+  dataType: "DATE" | "LONG" | "INTEGER" | "DECIMAL" | "STRING" | string;
+  required: boolean;
+  formatPattern?: string;
+  validationRules?: string;
 }
 
-export interface ReportParameterSchema {
+export interface ReportDefinitionResponse {
+  code: string;
   name: string;
-  label: string;
-  type: ReportParamType;
-  required: boolean;
-  options?: ReportParamOption[];
-  defaultValue?: unknown;
+  params: ReportParamResponse[];
 }
 
 export interface ExportReportInput {
-  format: "pdf" | "xlsx";
+  reportCode?: string;
+  format: "PDF" | "XLSX";
   params: Record<string, unknown>;
+}
+
+export interface ExportReportResult {
+  blob: Blob;
+  fileName: string;
+  contentType: string;
+}
+
+export interface ReportParamError {
+  param: string;
+  reason:
+    | "REQUIRED"
+    | "RANGE_INVALID"
+    | "RANGE_TOO_LONG"
+    | "INVALID_FORMAT"
+    | "INVALID_TYPE"
+    | "NOT_FOUND"
+    | string;
+  expected?: string;
 }

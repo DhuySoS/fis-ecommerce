@@ -12,7 +12,10 @@ export const customerSchema = z.object({
     .trim()
     .optional()
     .refine(
-      (val) => !val || val.length === 0 || /^[0-9+()\s.-]{8,15}$/.test(val),
+      (val) =>
+        !val ||
+        val.length === 0 ||
+        /^(0|\+84)[35789][0-9]{8}$/.test(val.replace(/[\s.-]/g, "")),
       "Số điện thoại không hợp lệ",
     ),
   status: z.enum(["ACTIVE", "INACTIVE"]),

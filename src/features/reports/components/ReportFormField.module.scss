@@ -1,0 +1,38 @@
+.formField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.required {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.control {
+  width: 100%;
+
+  :global(.ant-picker),
+  :global(.ant-select),
+  :global(.ant-input-number),
+  :global(.ant-input) {
+    width: 100%;
+  }
+}
+
+.errorText {
+  font-size: 13px;
+  color: #ef4444;
+  line-height: 1.4;
+  margin-top: 2px;
+}

@@ -10,10 +10,14 @@ export const CUSTOMER_KEYS = {
   detail: (id: number) => [...CUSTOMER_KEYS.details(), id] as const,
 };
 
-export function useCustomers(params?: CustomerQueryParams) {
+export function useCustomers(
+  params?: CustomerQueryParams,
+  options?: { enabled?: boolean },
+) {
   return useQuery({
     queryKey: CUSTOMER_KEYS.list(params),
     queryFn: () => customersApi.getCustomers(params),
+    enabled: options?.enabled,
   });
 }
 
@@ -56,3 +60,14 @@ export function useDeleteCustomer() {
     },
   });
 }
+
+export function useResendCustomerActivation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => customersApi.resendActivation(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: CUSTOMER_KEYS.lists() });
+    },
+  });
+}
+

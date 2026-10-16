@@ -1,24 +1,25 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import Link from "next/link";
+import React, { useSyncExternalStore } from "react";
 import ActionButton from "@/components/shared/ActionButton";
 import { LogoutOutlined, UserOutlined } from "@ant-design/icons";
 import { useAuthStore } from "@/features/auth";
 import styles from "./shop-layout.module.scss";
+
+const emptySubscribe = () => () => {};
 
 export default function ShopLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false,
+  );
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   return (
     <div className={styles.shopLayout}>

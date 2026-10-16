@@ -10,24 +10,28 @@ export interface ApiErrorResponse {
   code?: string;
   message?: string;
   details?: Record<string, string>;
+  errors?: Array<{ param: string; reason: string; expected?: string }>;
 }
 
 export class AppApiError extends Error {
   code?: string;
   status?: number;
   details?: Record<string, string>;
+  errors?: Array<{ param: string; reason: string; expected?: string }>;
 
   constructor(
     message: string,
     status?: number,
     code?: string,
-    details?: Record<string, string>
+    details?: Record<string, string>,
+    errors?: Array<{ param: string; reason: string; expected?: string }>
   ) {
     super(message);
     this.name = "AppApiError";
     this.status = status;
     this.code = code;
     this.details = details;
+    this.errors = errors;
   }
 }
 
@@ -79,14 +83,47 @@ const processQueue = (error: unknown, token: string | null = null) => {
 // 2. Response Interceptor: Chuẩn hóa dữ liệu trả về và tự động Refresh Token
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => {
+    // Nếu request yêu cầu blob, trích xuất filename từ content-disposition
+    if (response.config.responseType === "blob") {
+      const disposition =
+        response.headers["content-disposition"] ||
+        response.headers["Content-Disposition"];
+      let fileName = "";
+      if (disposition) {
+        const match = disposition.match(/filename=["']?([^"';]+)["']?/i);
+        if (match && match[1]) {
+          fileName = decodeURIComponent(match[1]);
+        }
+      }
+      return {
+        blob: response.data as Blob,
+        fileName,
+        contentType: response.headers["content-type"],
+      };
+    }
     return response.data;
   },
-  async (error: AxiosError<ApiErrorResponse>) => {
+  async (error: AxiosError<ApiErrorResponse | Blob>) => {
+    // Nếu responseType là blob nhưng response trả về lỗi (JSON), đọc text từ blob để parse JSON
+    if (
+      error.response &&
+      typeof Blob !== "undefined" &&
+      error.response.data instanceof Blob
+    ) {
+      try {
+        const text = await error.response.data.text();
+        const json = JSON.parse(text);
+        error.response.data = json;
+      } catch {
+        // bỏ qua nếu không parse được json
+      }
+    }
+
     const originalRequest = error.config as CustomAxiosRequestConfig | undefined;
 
     if (error.response && originalRequest) {
       const status = error.response.status;
-      const data = error.response.data;
+      const data = error.response.data as ApiErrorResponse | undefined;
       const url = originalRequest.url || "";
 
       // Tự động refresh token khi gặp 401 (ngoại trừ các endpoint xác thực /auth/)
@@ -184,7 +221,13 @@ apiClient.interceptors.response.use(
           : "Đã có lỗi xảy ra, vui lòng thử lại.");
 
       return Promise.reject(
-        new AppApiError(message, status, data?.code, data?.details)
+        new AppApiError(
+          message,
+          status,
+          data?.code,
+          data?.details,
+          data?.errors
+        )
       );
     }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { App } from "antd";
 import AdminPageContainer from "@/components/shared/AdminPageContainer";
 import ActionButton from "@/components/shared/ActionButton";
@@ -13,6 +13,7 @@ import type { ColumnsType } from "antd/es/table";
 import StatusTag from "@/components/shared/StatusTag";
 import { formatCurrency } from "@/lib/format";
 import { useTableQuery } from "@/hooks/useTableQuery";
+import { useMyManagedCategories } from "@/features/categories";
 import type { Product, ProductStatus } from "../types";
 import {
   useProducts,
@@ -35,9 +36,20 @@ export default function ProductManagement() {
     pageSize: query.pageSize,
     search: query.search,
     status: query.status as ProductStatus | undefined,
+    categoryId: query.categoryId ? Number(query.categoryId) : undefined,
     sortBy: query.sortBy as "name" | "price" | undefined,
     sortOrder: query.sortOrder,
   });
+
+  const { data: categories = [] } = useMyManagedCategories();
+  const categoryFilterOptions = useMemo(() => {
+    const base = [{ value: "all", label: "Tất cả danh mục" }];
+    const items = categories.map((c) => ({
+      value: String(c.id),
+      label: c.name,
+    }));
+    return [...base, ...items];
+  }, [categories]);
 
   const createMutation = useCreateProduct();
   const updateMutation = useUpdateProduct();
@@ -112,6 +124,13 @@ export default function ProductManagement() {
       key: "name",
     },
     {
+      title: "Danh mục",
+      dataIndex: "categoryName",
+      key: "categoryName",
+      render: (_: unknown, record: Product) =>
+        record.categoryName ? record.categoryName : "-",
+    },
+    {
       title: "Giá (₫)",
       dataIndex: "price",
       key: "price",
@@ -168,6 +187,15 @@ export default function ProductManagement() {
           placeholder="Tìm theo tên sản phẩm"
           value={query.search || ""}
           onChange={(search) => updateQuery({ search })}
+        />
+
+        <FilterSelect
+          prefixLabel="Danh mục:"
+          value={(query.categoryId as string) || "all"}
+          onChange={(val) =>
+            updateQuery({ categoryId: val === "all" ? undefined : val })
+          }
+          options={categoryFilterOptions}
         />
 
         <FilterSelect

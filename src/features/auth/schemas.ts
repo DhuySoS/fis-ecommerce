@@ -41,3 +41,19 @@ export const registerSchema = z.object({
 
 export type LoginFormValues = z.infer<typeof loginSchema>;
 export type RegisterFormValues = z.infer<typeof registerSchema>;
+
+export const setPasswordSchema = z
+  .object({
+    password: z
+      .string()
+      .min(1, "Mật khẩu mới là bắt buộc")
+      .min(8, "Mật khẩu phải có ít nhất 8 ký tự")
+      .max(50, "Mật khẩu không được quá 50 ký tự"),
+    confirmPassword: z.string().min(1, "Vui lòng xác nhận lại mật khẩu"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Mật khẩu xác nhận không khớp",
+    path: ["confirmPassword"],
+  });
+
+export type SetPasswordFormValues = z.infer<typeof setPasswordSchema>;

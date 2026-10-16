@@ -8,6 +8,7 @@ export const productSchema = z.object({
     .int("Tồn kho phải là số nguyên")
     .min(0, "Tồn kho phải lớn hơn hoặc bằng 0"),
   status: z.enum(["ACTIVE", "INACTIVE"]),
+  categoryId: z.number().nullable().optional(),
 });
 
 export type ProductFormValues = z.infer<typeof productSchema>;

@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useSyncExternalStore } from "react";
 import AdminPageContainer from "@/components/shared/AdminPageContainer";
+import ActionButton from "@/components/shared/ActionButton";
 import DataTable from "@/components/shared/DataTable";
 import StatusTag from "@/components/shared/StatusTag";
 import { Select, Tabs } from "antd";
@@ -12,6 +13,7 @@ import type { OrderStatus } from "@/lib/order-state-machine";
 import type { Order } from "../types";
 import { useOrders } from "../hooks";
 import { useCustomers } from "@/features/customers/hooks";
+import { useAuthStore } from "@/features/auth";
 import styles from "./OrderManagement.module.scss";
 import { CaretDownOutlined } from "@ant-design/icons";
 
@@ -25,7 +27,17 @@ const ORDER_STATUS_TABS = [
   { key: "CANCELLED", label: "CANCELLED" },
 ];
 
+const emptySubscribe = () => () => {};
+
 export default function OrderManagement() {
+  const isClient = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false,
+  );
+  const user = useAuthStore((state) => state.user);
+  const isAdmin = isClient && user?.role === "ADMIN";
+
   const { query, updateQuery, handleTableChange } = useTableQuery<Order>();
 
   const { data: orderData, isLoading } = useOrders(query);
@@ -96,7 +108,7 @@ export default function OrderManagement() {
     <AdminPageContainer
       title="Quản lý đơn hàng"
       extra={
-        <div>
+        <div className={styles.extraActions}>
           <Select
             className={styles.customerSelect}
             value={query.customerId ? String(query.customerId) : "all"}
@@ -105,6 +117,11 @@ export default function OrderManagement() {
             options={customerOptions}
             suffixIcon={<CaretDownOutlined />}
           />
+          {isAdmin && (
+            <ActionButton onClick={() => window.open("/orders/new", "_blank")}>
+              + Tạo đơn
+            </ActionButton>
+          )}
         </div>
       }
     >

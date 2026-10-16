@@ -6,6 +6,11 @@ export interface Product {
   price: number;
   stock: number;
   status: ProductStatus;
+  categoryId?: number | null;
+  categoryName?: string | null;
+  categoryCode?: string | null;
+  managedByUserId?: number | null;
+  managedByUsername?: string | null;
 }
 
 export interface ProductQueryParams {
@@ -13,6 +18,7 @@ export interface ProductQueryParams {
   pageSize?: number;
   search?: string;
   status?: ProductStatus;
+  categoryId?: number;
   sortBy?: "name" | "price";
   sortOrder?: "ascend" | "descend";
 }
@@ -22,6 +28,7 @@ export interface CreateProductInput {
   price: number;
   stock: number;
   status: ProductStatus;
+  categoryId?: number | null;
 }
 
 export type UpdateProductInput = Partial<CreateProductInput>;

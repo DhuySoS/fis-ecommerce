@@ -20,11 +20,14 @@ interface AuthState {
   user: AuthUser | null;
   accessToken: string | null;
   isAuthenticated: boolean;
+  isLoading: boolean;
+  isInitialized: boolean;
 
   setAuth: (response: LoginResponse) => void;
   updateAccessToken: (accessToken: string, refreshToken?: string) => void;
   clearAuth: () => void;
   logout: () => Promise<void>;
+  checkAuth: (force?: boolean) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => {
@@ -44,6 +47,8 @@ export const useAuthStore = create<AuthState>((set, get) => {
     user: initialUser,
     accessToken: initialToken,
     isAuthenticated: Boolean(initialToken),
+    isLoading: Boolean(initialToken),
+    isInitialized: !initialToken,
 
     setAuth: (response: LoginResponse) => {
       const user: AuthUser = {
@@ -67,6 +72,8 @@ export const useAuthStore = create<AuthState>((set, get) => {
         user,
         accessToken: response.accessToken,
         isAuthenticated: true,
+        isLoading: false,
+        isInitialized: true,
       });
     },
 
@@ -93,7 +100,51 @@ export const useAuthStore = create<AuthState>((set, get) => {
         user: null,
         accessToken: null,
         isAuthenticated: false,
+        isLoading: false,
+        isInitialized: true,
       });
+    },
+
+    checkAuth: async (force = false) => {
+      const token =
+        get().accessToken ||
+        (typeof window !== "undefined" ? getAccessToken() : null);
+
+      if (!token) {
+        set({ isLoading: false, isInitialized: true });
+        return;
+      }
+
+      if (get().isInitialized && !force) {
+        return;
+      }
+
+      set({ isLoading: true });
+      try {
+        const profile = await authApi.getMe();
+        if (profile) {
+          const user: AuthUser = {
+            username: profile.username,
+            role: profile.role,
+            customerId: profile.customerId,
+          };
+
+          if (typeof window !== "undefined" && profile.role) {
+            setCookie("role", profile.role);
+          }
+
+          set({
+            user,
+            isAuthenticated: true,
+            isLoading: false,
+            isInitialized: true,
+          });
+        } else {
+          set({ isLoading: false, isInitialized: true });
+        }
+      } catch {
+        set({ isLoading: false, isInitialized: true });
+      }
     },
 
     logout: async () => {
